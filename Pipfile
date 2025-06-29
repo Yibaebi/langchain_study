@@ -11,6 +11,7 @@ langchainhub="*"
 langchain-ollama = "*"
 langchain-anthropic = "*"
 requests = "*"
+langchain-tavily = "*"
 
 [dev-packages]
 
