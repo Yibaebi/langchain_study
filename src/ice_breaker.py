@@ -3,6 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
+from agents.linkedin_lookup_agent import lookup
 from utils.linkedin_scrapper import scrape_linkedin_profile
 
 
@@ -38,13 +39,15 @@ class PresidentProfileIceBreaker:
 
 
 class LinkedInProfileSummaryIceBreaker:
-    def get_linkedin_profile_info(self):
+    def get_linkedin_profile_info(self, name_with_unique_info):
         """
         Scrapes and Formats Scraped LinkedIn Info
         """
+        linkedin_url = lookup(name_with_unique_info=name_with_unique_info)
 
-        profile = "https://www.linkedin.com/in/yibaebi-elliot/"
-        profile_info = scrape_linkedin_profile(profile, mock=True)
+        profile_info = scrape_linkedin_profile(
+            linkedin_profile_url=linkedin_url, mock=False
+        )
 
         return profile_info
 
@@ -57,6 +60,8 @@ class LinkedInProfileSummaryIceBreaker:
             Create the following for the Linkedin profile data {linkedin_profile}.
             1. A short professional summary of the profile.
             2. Two interesting facts about the linkedin profile.
+            
+            If the profile is unavailable you can respond that the profile is not found.
         """
 
         linkedin_profile_prompt = PromptTemplate(
