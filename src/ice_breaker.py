@@ -5,6 +5,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from agents.linkedin_lookup_agent import lookup
 from utils.linkedin_scrapper import scrape_linkedin_profile
+from output_parsers import profile_summary_parser
 
 
 class PresidentProfileIceBreaker:
@@ -46,7 +47,7 @@ class LinkedInProfileSummaryIceBreaker:
         linkedin_url = lookup(name_with_unique_info=name_with_unique_info)
 
         profile_info = scrape_linkedin_profile(
-            linkedin_profile_url=linkedin_url, mock=False
+            linkedin_profile_url=linkedin_url, mock=True
         )
 
         return profile_info
@@ -62,14 +63,19 @@ class LinkedInProfileSummaryIceBreaker:
             2. Two interesting facts about the linkedin profile.
             
             If the profile is unavailable you can respond that the profile is not found.
+            \n{format_instructions}
         """
 
         linkedin_profile_prompt = PromptTemplate(
-            input_variables=["linkedin_profile"], template=prompt_template
+            template=prompt_template,
+            input_variables=["linkedin_profile"],
+            partial_variables={
+                "format_instructions": profile_summary_parser.get_format_instructions()
+            },
         )
 
         llm = ChatAnthropic(model="claude-sonnet-4-20250514")
-        chain = linkedin_profile_prompt | llm | StrOutputParser()
+        chain = linkedin_profile_prompt | llm | profile_summary_parser
         res = chain.invoke(input={"linkedin_profile": profile})
 
         return res
