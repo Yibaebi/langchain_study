@@ -1,22 +1,19 @@
 from langchain_anthropic import ChatAnthropic
 from langchain import hub
-from langchain.prompts import PromptTemplate
-from langchain.agents import create_react_agent, Tool, AgentExecutor
+from langchain.agents import create_react_agent, Tool, AgentExecutor, AgentOutputParser
 from tools.tools import find_linkedin_profile
+from output_parsers import linked_search_result_parser
 
 
 def lookup(name_with_unique_info: str):
-    llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+    input_text = f"""
+      Find the LinkedIn profile URL for: {name_with_unique_info}
 
-    lookup_template = """
-      You are given the following person's name and unique info - {name_with_unique_info}.
-      Your goal will be to return only the URL to the person's profile.
+      Please return your final answer in this format:
+      {linked_search_result_parser.get_format_instructions()}
     """
 
-    lookup_prompt_template = PromptTemplate(
-        template=lookup_template,
-        input_variables=["name_with_unique_info"],
-    )
+    llm = ChatAnthropic(model="claude-sonnet-4-20250514")
 
     lookup_tools = [
         Tool(
@@ -35,14 +32,8 @@ def lookup(name_with_unique_info: str):
     )
 
     agent_executor = AgentExecutor(agent=agent, tools=lookup_tools, verbose=True)
+    response = agent_executor.invoke(input={"input": input_text})
+    profile_url = linked_search_result_parser.parse(response["output"])
+    url = profile_url.url
 
-    response = agent_executor.invoke(
-        input={
-            "input": lookup_prompt_template.format_prompt(
-                name_with_unique_info=name_with_unique_info
-            )
-        }
-    )
-
-    profile_url: str = response["output"]
-    return profile_url
+    return url
