@@ -1,5 +1,7 @@
+from dotenv import load_dotenv
 from ice_breaker import linkedin_profile_IB
 
+load_dotenv()
 
 if __name__ == "__main__":
     # LinkedIn Profile Summary Ice Breaker
