@@ -12,6 +12,9 @@ langchain-ollama = "*"
 langchain-anthropic = "*"
 requests = "*"
 langchain-tavily = "*"
+langgraph = "*"
+black = "*"
+isort = "*"
 
 [dev-packages]
 
