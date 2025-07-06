@@ -12,4 +12,4 @@ def triple(number: float) -> float:
 
 
 tools = [TavilySearch(max_results=1), triple]
-llm = ChatAnthropic(model="claude-sonnet-4-20250514", temperature=0)
+llm = ChatAnthropic(model="claude-sonnet-4-20250514").bind_tools(tools)
